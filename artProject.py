@@ -1,9 +1,13 @@
+#INSTRUCTIONS
+#Write Next or Back to switch between the Football Field, Soccer Field and Tennis Court.
+#Watch the image change after you input 'Next' or 'Back'
+
 import turtle as trtl
 painter = trtl.Turtle()
 
 i = 0
 painter.speed(100)
-fieldlist = ['Football', 'Soccer', 'Basketball', 'Tennis', None]
+fieldlist = ['Football', 'Soccer', 'Tennis', None]
 w = 0
 m = 0
 
@@ -13,12 +17,12 @@ painter.hideturtle()
 
 def drawFootball():
     painter.penup()
-    painter.pensize(5)
-    painter.color('Black')
+    painter.pensize(10)
     painter.goto(-350, 200)
+    painter.pencolor("Black")
     painter.pendown()
     painter.begin_fill()
-    painter.fillcolor('Green')
+    painter.fillcolor("Green")
     for i in range(2):
         painter.forward(600)
         painter.right(90)
@@ -91,9 +95,24 @@ def drawSoccer():
         painter.right(90)
         painter.forward(80)
         painter.right(90)
-    painter.shape
-    
-        
+    painter.penup()
+    painter.turtlesize(.5)
+    painter.color("White", "White")
+    painter.shape("circle")
+    painter.goto(-252, 0)
+    painter.stamp()
+    painter.goto(252, 0)
+    painter.stamp()
+    painter.goto(0, 0)
+    painter.stamp()
+    #painter.goto(-300, 225)
+    #painter.stamp()
+    #painter.goto(300, 225)
+    #painter.stamp()
+    #painter.goto(-300, -225)
+    #painter.stamp()
+    #painter.goto(300, -225)
+    #painter.stamp() 
 def drawTennis():
     painter.penup()
     painter.pensize(3)
@@ -136,8 +155,18 @@ def drawTennis():
     painter.pendown()
     painter.forward(300)
     
-drawSoccer()
 while(0 == 0):
+
+    if(m == 0):
+        trtl.clearscreen()
+        drawFootball()
+    elif(m == 1):
+        trtl.clearscreen()
+        drawSoccer()
+    elif(m == 2):
+        trtl.clearscreen()
+        drawTennis()
+    
     change = input()
     if(change == 'Next'):
         w = fieldlist[m + 1]
@@ -147,12 +176,15 @@ while(0 == 0):
         w = fieldlist[m - 1]
         print(w)
         m = m - 1
+
     if(m == -1):
         print("Can't go further.")
         m = 0
-    elif(m == 4):
+    elif(m == 3):
         print("Can't go further.")
-        m = 3
+        m = 2
+    
+
         
         
 wn = trtl.Screen()
