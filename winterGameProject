@@ -24,6 +24,8 @@ scoreInterval = 50
 
 fallRate = 5
 
+collision = False
+
 #List
 spikeColors = ["pink", "red", "green", "orange", "blue", "yellow"]
 spikeSize = [1, 2, 3, 4, 5]
@@ -31,8 +33,6 @@ spikeSize = [1, 2, 3, 4, 5]
 spikeClones = []
 
 #Game Config
-
-
 rightBound = wn.window_width() / 2
 leftBound = -wn.window_width() / 2
 leftBoundInt = math.floor(leftBound)
@@ -96,7 +96,6 @@ scoreWriter.goto(-150, 225)
 def updateScore():
     global score, fontSetup, spikeClones
     spikeCloning()
-    healthFunc(spikeClones)
     spikeAddition(spikeClones)
     scoreWriter.clear()
     scoreWriter.write(str(score), font = fontSetup)
@@ -115,7 +114,7 @@ def countdown():
             counter.clear()
             updateScore()
             fallRateFunc()
-            healthFunc()
+            healthFunc(collision)
             scorerCalled = True
         elif timerInternal >= 0:
             counter.write("GO!!!", font = fontSetup)
@@ -177,22 +176,31 @@ def fallRateFunc():
     wn.ontimer(fallRateFunc, 50)
 
 def spikeAddition(spikeClones: list[trtl.Turtle]):
-    global sci, score
-    print("Hoi yaaa")
+    global sci, score, collision
+    collision = False
+    repeaterCheck = False
     for i in range(sci):
         spikeElement = spikeClones[i]
         
         spikeElement.showturtle()
         
         spikeElement.sety(spikeElement.ycor() - fallRate)
+
+        if(player.distance(spikeElement) < 100,100 and repeaterCheck == False):
+            collision = True
+        else:
+            collision = False
         
-        if(spikeElement.ycor() <= bottomBound):
+        if(spikeElement.ycor() <= bottomBound or collision == True):
             spikeElement.sety(225)
+            #spikeElement.shapesize(spikeSize[random.randint(0,len(spikeSize))])
+            #spikeElement.color(spikeColors[random.randint(0,len(spikeColors))])
             spikeElement.setx(random.randint(leftBoundInt, rightBoundInt))
     wn.update()
     
-def healthFunc(spikeClones: list[trtl.Turtle]):
+def healthFunc(collision):
     global gameStart
+    hci = 0
 
     healthList = []
 
@@ -204,18 +212,22 @@ def healthFunc(spikeClones: list[trtl.Turtle]):
             hci = len(healthList)
         gameStart = False
 
-    
-    if(player.distance(spikeClones[i].position()) < 20 & healthRepeaterCheck):
+    if(collision == True):
         healthList.pop[hci]
         hci -= 1
-        healthRepeaterCheck = True
 
-    elif(player.distance() > 20):
-        print("collision")
-        healthRepeaterCheck = False
+    if(hci == 0):
+        gameEnd()
+    wn.update()
           
 def gameEnd():
-    wn.bye()
+    endRepeater = 0
+    if(endRepeater <= 6):
+        wn.ontimer(counterInterval)
+        scoreWriter.clear()
+        scoreWriter.write(str(score), font = fontSetup)
+    else:
+        wn.bye()
         
 #Events
 wn.listen()
