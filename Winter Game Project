@@ -98,6 +98,7 @@ scoreWriter.goto(-150, 225)
 def updateScore():
     global score, fontSetup, spikeClones
     spikeCloning()
+    healthClones()
     spikeAddition(spikeClones)
     scoreWriter.clear()
     scoreWriter.write(str(score), font = fontSetup)
@@ -167,8 +168,6 @@ def spikeCloning():
     if(score % 1000 == 0 and sci <= 6):
         spikeClones.append(spikeMaster.clone())
         sci += 1
-    #if score == 0:
-        #sci += 1
     
 def fallRateFunc():
     global fallRate
@@ -179,7 +178,6 @@ def fallRateFunc():
 
 def spikeAddition(spikeClones: list[trtl.Turtle]):
     global sci, score, collision
-    collision = False
     for i in range(sci):
         spikeElement = spikeClones[i]
         
@@ -194,9 +192,9 @@ def spikeAddition(spikeClones: list[trtl.Turtle]):
             spikeElement.setx(random.randint(leftBoundInt, rightBoundInt))
     wn.update()
     
-def healthFunc(spikeClones: list[trtl.Turtle]):
+def healthClones():
     global gameStart
-
+    
     health.goto(-300, -275)
     if gameStart == True:
         for _ in range(3):
@@ -205,15 +203,19 @@ def healthFunc(spikeClones: list[trtl.Turtle]):
             healthList.append(clone)
             health.setx(health.xcor()+ 50)
         gameStart = False
-        
-    print(healthList)
+    
+def healthFunc(spikeClones: list[trtl.Turtle]):
+    global collision
+    
+    print(collision, "1")
     
     for spikeElement in spikeClones:
-        if player.distance(spikeElement) < 85:  # Adjust distance as needed
+        if player.distance(spikeElement) < 100:
             print("collision")
             collision = True
+            break
     
-    if(collision == True and healthList == True):
+    if(collision and healthList):
         print("Debug01")
         healthList[-1].hideturtle()
         healthList.pop()
