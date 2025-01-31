@@ -1,0 +1,248 @@
+#import statements
+import turtle as trtl
+import math
+import random
+import time
+
+wn = trtl.Screen()
+wn.tracer(0)
+
+#Timer Variables
+fontSetup = ("Arial", 75, "normal")
+
+timer = 3
+counterInterval = 1000  #1000 represents 1 second
+timerInternal = 3
+
+
+#Other Variables
+movingLeft = False
+movingRight = False
+
+gameStart = False
+
+scoreInterval = 50
+
+fallRate = 5
+
+collision = False
+#List
+spikeColors = ["pink", "red", "green", "orange", "blue", "yellow"]
+spikeSize = [1, 2, 3, 4, 5]
+
+healthList = []
+
+spikeClones = []
+
+#Game Config
+rightBound = wn.window_width() / 2
+leftBound = -wn.window_width() / 2
+leftBoundInt = math.floor(leftBound)
+rightBoundInt = math.floor(rightBound)
+
+topBound = wn.window_height() / 2
+bottomBound = -wn.window_height() / 2
+topBoundInt = math.floor(topBound)
+bottomBoundInt = math.floor(bottomBound)
+
+score = int(0) #score variable
+scorerCalled = False
+
+spikeShape = "triangle"
+sci = 0 #sci(Spike Clone Index) is set equal to the amount of spike clones active in the list "spikeClones". Identifies activity and thus allows the application of mechanics to the clones that are active.
+
+gameEndVar = False
+#Initialize Turtles
+trtl.register_shape("playerShape", ((0, 0), (10,10), (-20, -10), (-20, 10), (10, -10)))
+
+player = trtl.Turtle()
+player.fillcolor("Purple")
+player.shapesize(3.5)
+player.shape("playerShape")
+player.penup()
+player.hideturtle()
+player.goto(0, -200)
+player.showturtle()
+player.speed(0)
+
+health = trtl.Turtle()
+health.color("Dark Red")
+health.shape("circle")
+health.shapesize(2)
+health.penup()
+health.hideturtle()
+
+spikeMaster = trtl.Turtle()
+spikeMaster.hideturtle()
+spikeMaster.fillcolor("pink")
+spikeMaster.shape("triangle")
+spikeMaster.shapesize(5)
+spikeMaster.seth(30)
+spikeMaster.penup()
+spikeMaster.speed(0)
+spikeMaster.goto(0, 225)
+
+counter = trtl.Turtle()
+counter.hideturtle()
+counter.penup()
+counter.goto(-150, 225)
+
+scoreWriter = trtl.Turtle()
+scoreWriter.hideturtle()
+scoreWriter.penup()
+scoreWriter.goto(-150, 225)
+
+
+#Time Functions
+
+def updateScore():
+    global score, fontSetup, spikeClones
+    spikeCloning()
+    spikeAddition(spikeClones)
+    scoreWriter.clear()
+    scoreWriter.write(str(score), font = fontSetup)
+    score += 10
+    scoreWriter.getscreen().ontimer(updateScore, scoreInterval)
+    wn.update()
+
+def countdown():
+    global timer, timerUp, timerInternal, scorerCalled, gameStart
+    counter.clear()
+    if timer <= 0:
+        timerUp = True
+        timerInternal -= 1
+        if timerInternal <= 0 and scorerCalled == False:
+            gameStart = True
+            counter.clear()
+            updateScore()
+            fallRateFunc()
+            healthFunc(spikeClones)
+            scorerCalled = True
+        elif timerInternal >= 0:
+            counter.write("GO!!!", font = fontSetup)
+            timerInternal -= 1
+    else:
+        counter.write(str(timer), font = fontSetup)
+        timer -= 1
+        print("Timer: ", timer)
+    counter.getscreen().ontimer(countdown, counterInterval)
+    
+#Game Functions
+    
+def checkBounds():
+    global player
+    if player.xcor() < leftBound:
+        player.setx(leftBound)
+    if player.xcor() > rightBound:
+        player.setx(rightBound)   
+    
+def move():
+    global movingLeft, movingRight
+    if movingRight:
+        player.setx(player.xcor() + 8)
+    if movingLeft:
+        player.setx(player.xcor() - 8)
+    checkBounds()
+    wn.update()
+    wn.ontimer(move, 10)
+        
+def startMovingLeft():
+    global movingLeft
+    movingLeft = True
+
+def stopMovingLeft():
+    global movingLeft
+    movingLeft = False
+
+def startMovingRight():
+    global movingRight
+    movingRight = True
+
+def stopMovingRight():
+    global movingRight
+    movingRight = False
+        
+def spikeCloning():
+    global sci, score
+    if(score % 1000 == 0 and sci <= 6):
+        spikeClones.append(spikeMaster.clone())
+        sci += 1
+    #if score == 0:
+        #sci += 1
+    
+def fallRateFunc():
+    global fallRate
+    if score % 500 == 0 and fallRate <= 18:
+        fallRate += 3
+        print(fallRate)
+    wn.ontimer(fallRateFunc, 50)
+
+def spikeAddition(spikeClones: list[trtl.Turtle]):
+    global sci, score, collision
+    collision = False
+    for i in range(sci):
+        spikeElement = spikeClones[i]
+        
+        spikeElement.showturtle()
+        
+        spikeElement.sety(spikeElement.ycor() - fallRate)
+        
+        if(spikeElement.ycor() <= bottomBound or collision):
+            spikeElement.sety(225)
+            spikeElement.shapesize(spikeSize[random.randint(0,len(spikeSize)-1)])
+            spikeElement.color(spikeColors[random.randint(0,len(spikeColors)-1)])
+            spikeElement.setx(random.randint(leftBoundInt, rightBoundInt))
+    wn.update()
+    
+def healthFunc(spikeClones: list[trtl.Turtle]):
+    global gameStart
+
+    health.goto(-300, -275)
+    if gameStart == True:
+        for _ in range(3):
+            clone = health.clone()
+            clone.showturtle()
+            healthList.append(clone)
+            health.setx(health.xcor()+ 50)
+        gameStart = False
+        
+    print(healthList)
+    
+    for spikeElement in spikeClones:
+        if player.distance(spikeElement) < 85:  # Adjust distance as needed
+            print("collision")
+            collision = True
+    
+    if(collision == True and healthList == True):
+        print("Debug01")
+        healthList[-1].hideturtle()
+        healthList.pop()
+        collision = False
+        
+        print("Debug")
+
+    if(len(healthList) == 0):
+        gameEnd()
+    wn.update()
+          
+def gameEnd():
+    player.hideturtle()
+    time.sleep(3)
+    wn.bye()
+        
+#Events
+wn.listen()
+wn.onkeypress(startMovingLeft, "Left")
+wn.onkeyrelease(stopMovingLeft, "Left")
+wn.onkeypress(startMovingRight, "Right")
+wn.onkeyrelease(stopMovingRight, "Right")
+wn.onkeypress(startMovingLeft, "a")
+wn.onkeyrelease(stopMovingLeft, "a")
+wn.onkeypress(startMovingRight, "d")
+wn.onkeyrelease(stopMovingRight, "d")
+wn.onkeypress(gameEnd, "space")
+countdown()
+move()
+wn.bgcolor("Light Blue")
+wn.update()
+wn.mainloop()
